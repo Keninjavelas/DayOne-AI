@@ -33,6 +33,7 @@ type ChatMessage = {
 type ChatInterfaceProps = { apiBaseUrl?: string };
 
 const CONFIDENCE_VERIFIED_THRESHOLD = 0.4;
+const DEFAULT_DEMO_PROMPT = "What are the PTO rules?";
 
 const SUGGESTIONS = [
   { icon: "🕐", text: "What are the core hours?" },
@@ -67,6 +68,7 @@ export default function ChatInterface({ apiBaseUrl }: ChatInterfaceProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const rehydratedRef = useRef(false);
+  const demoSeededRef = useRef(false);
 
   useEffect(() => {
     const isMinimal = localStorage.getItem("dayone_minimal_mode") === "true";
@@ -112,6 +114,13 @@ export default function ChatInterface({ apiBaseUrl }: ChatInterfaceProps) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, sending]);
+
+  useEffect(() => {
+    if (!token || !rehydratedRef.current || demoSeededRef.current || sending) return;
+    if (messages.length > 0) return;
+    demoSeededRef.current = true;
+    void sendPrompt(DEFAULT_DEMO_PROMPT);
+  }, [messages.length, sending, token]);
 
   const appendMessages = (...nextMessages: ChatMessage[]) => {
     setMessages(prev => [...prev, ...nextMessages]);
@@ -318,12 +327,16 @@ export default function ChatInterface({ apiBaseUrl }: ChatInterfaceProps) {
 
   const getConfidenceLabel = (confidence?: number) => {
     if (confidence === undefined) return null;
-    return confidence >= CONFIDENCE_VERIFIED_THRESHOLD ? "Verified" : "Moderate";
+    if (confidence >= 0.7) return "High";
+    if (confidence >= CONFIDENCE_VERIFIED_THRESHOLD) return "Medium";
+    return "Low";
   };
 
   const getConfidenceTone = (confidence?: number) => {
-    if (confidence === undefined) return "moderate";
-    return confidence >= CONFIDENCE_VERIFIED_THRESHOLD ? "verified" : "moderate";
+    if (confidence === undefined) return "low";
+    if (confidence >= 0.7) return "high";
+    if (confidence >= CONFIDENCE_VERIFIED_THRESHOLD) return "medium";
+    return "low";
   };
 
   return (
@@ -364,9 +377,9 @@ export default function ChatInterface({ apiBaseUrl }: ChatInterfaceProps) {
         .signout-btn:hover { border-color:rgba(56,189,248,0.45); transform:translateY(-1px) scale(1.01); box-shadow:0 16px 36px rgba(14,165,233,0.16); color:#ffffff; }
         .chat-main { margin-left:280px; min-height:100vh; display:flex; flex-direction:column; }
         .chat-main.sidebar-closed { margin-left:0; }
-        .chat-header { border-bottom:1px solid rgba(255,255,255,0.08); background:rgba(2,6,23,0.72); backdrop-filter:blur(24px) saturate(140%); padding:1.5rem 2rem; position:sticky; top:0; z-index:10; }
-        .chat-messages { flex:1; padding:2rem; padding-bottom:7rem; overflow-y:auto; }
-        .welcome-title { font-size:2.25rem; font-weight:700; color:#f8fafc; letter-spacing:-0.04em; margin:0 0 0.75rem; }
+        .chat-header { border-bottom:1px solid rgba(255,255,255,0.08); background:rgba(2,6,23,0.68); backdrop-filter:blur(24px) saturate(140%); padding:1rem 2rem; position:sticky; top:0; z-index:10; }
+        .chat-messages { flex:1; padding:1.1rem 2rem 1.25rem; padding-bottom:5.5rem; overflow-y:auto; }
+        .welcome-title { font-size:2.35rem; font-weight:800; color:#f8fafc; letter-spacing:-0.05em; margin:0 0 0.55rem; }
         .suggestion-card { border-radius:16px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); padding:1rem; text-align:left; font-size:0.875rem; font-family:'Inter',sans-serif; color:#cbd5e1; cursor:pointer; transition:transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease; display:flex; flex-direction:column; gap:0.4rem; backdrop-filter:blur(12px); }
         .suggestion-card:hover { border-color:rgba(56,189,248,0.35); background:rgba(255,255,255,0.06); transform:translateY(-2px) scale(1.01); box-shadow:0 14px 34px rgba(0,0,0,0.22); }
         @keyframes messageIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
@@ -378,8 +391,9 @@ export default function ChatInterface({ apiBaseUrl }: ChatInterfaceProps) {
         .streaming-cursor { display:inline-block; width:2px; height:1em; background:#38bdf8; margin-left:2px; vertical-align:text-bottom; animation:cursor-blink 0.8s ease infinite; }
         .meta-bar { margin-top:0.8rem; display:flex; align-items:center; flex-wrap:wrap; gap:0.6rem; }
         .conf-badge { display:inline-flex; align-items:center; gap:0.35rem; font-size:0.72rem; font-weight:700; padding:0.4rem 0.8rem; border-radius:999px; letter-spacing:0.02em; transition:all 0.2s ease; box-shadow:0 10px 24px rgba(0,0,0,0.18); }
-        .conf-verified { background:linear-gradient(135deg, rgba(34,197,94,0.18), rgba(16,185,129,0.12)); color:#bbf7d0; border:1px solid rgba(34,197,94,0.28); }
-        .conf-moderate { background:linear-gradient(135deg, rgba(234,179,8,0.16), rgba(245,158,11,0.1)); color:#fde68a; border:1px solid rgba(234,179,8,0.28); }
+        .conf-high { background:linear-gradient(135deg, rgba(34,197,94,0.18), rgba(16,185,129,0.12)); color:#bbf7d0; border:1px solid rgba(34,197,94,0.28); }
+        .conf-medium { background:linear-gradient(135deg, rgba(59,130,246,0.18), rgba(96,165,250,0.12)); color:#bfdbfe; border:1px solid rgba(59,130,246,0.28); }
+        .conf-low { background:linear-gradient(135deg, rgba(234,179,8,0.16), rgba(245,158,11,0.1)); color:#fde68a; border:1px solid rgba(234,179,8,0.28); }
         .abstain-bubble { border: 1px solid rgba(244, 63, 94, 0.4) !important; background: rgba(244, 63, 94, 0.08) !important; box-shadow: 0 4px 12px rgba(244, 63, 94, 0.1) !important; }
         .abstain-icon { font-size: 1.6rem; margin-bottom: 0.5rem; display: block; filter: drop-shadow(0 0 4px rgba(244, 63, 94, 0.2)); }
         .abstain-title { font-weight: 700; color: #fda4af; margin-bottom: 0.3rem; display: block; letter-spacing: -0.01em; }
@@ -401,9 +415,16 @@ export default function ChatInterface({ apiBaseUrl }: ChatInterfaceProps) {
         .sources-details { margin-top:0.875rem; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); padding:0.75rem 1rem; backdrop-filter:blur(12px); }
         .sources-summary { font-size:0.8rem; font-weight:600; color:#38bdf8; user-select:none; margin-bottom:0.45rem; }
         .source-item { border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.04); padding:0.5rem 0.75rem; font-size:0.8rem; margin-top:0.4rem; }
+        .welcome-panel { display:grid; place-items:center; min-height:32vh; padding-top:0.25rem; }
+        .welcome-panel-inner { max-width:620px; text-align:center; padding:1.1rem 1.1rem 1.2rem; border-radius:20px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); backdrop-filter:blur(14px); box-shadow:0 18px 44px rgba(0,0,0,0.18); }
+        .welcome-suggestions { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; margin-top:1rem; }
+        .header-row { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
+        .header-brand { display:flex; align-items:center; gap:0.75rem; }
+        .header-accent { width:10px; height:10px; border-radius:999px; background:linear-gradient(135deg, #38bdf8, #3b82f6); box-shadow:0 0 18px rgba(56,189,248,0.55); }
+        .header-meta { padding:0.45rem 0.75rem; border-radius:999px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); backdrop-filter:blur(12px); font-size:0.72rem; color:#94a3b8; }
         @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
         .typing-dot { width:7px; height:7px; border-radius:50%; background:#38bdf8; animation:bounce 1.2s ease-in-out infinite; }
-        .chat-input-wrap { position:sticky; bottom:0; border-top:1px solid rgba(255,255,255,0.08); background:rgba(2,6,23,0.74); backdrop-filter:blur(24px) saturate(140%); padding:1.25rem 2rem; }
+        .chat-input-wrap { position:sticky; bottom:0; border-top:1px solid rgba(255,255,255,0.08); background:rgba(2,6,23,0.74); backdrop-filter:blur(24px) saturate(140%); padding:0.75rem 2rem 1rem; }
         .chat-input-inner { max-width:800px; margin:0 auto; display:flex; align-items:flex-end; gap:0.75rem; border-radius:20px; border:1px solid rgba(255,255,255,0.09); background:rgba(255,255,255,0.04); padding:0.75rem 0.75rem 0.75rem 1.125rem; box-shadow:0 18px 44px rgba(0,0,0,0.28); transition:border-color 0.2s, transform 0.2s; backdrop-filter:blur(16px) saturate(150%); }
         .chat-input-inner:focus-within { border-color:rgba(56,189,248,0.35); transform:translateY(-1px); }
         .chat-textarea { flex:1; background:transparent; border:none; outline:none; resize:none; font-size:0.9rem; font-family:'Inter',sans-serif; color:#f1f5f9; line-height:1.5; max-height:160px; min-height:24px; overflow-y:auto; padding:0; }
@@ -493,27 +514,30 @@ export default function ChatInterface({ apiBaseUrl }: ChatInterfaceProps) {
         {/* Main */}
         <section className={`chat-main${sidebarOpen ? "" : " sidebar-closed"}`}>
           <header className="chat-header">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <p style={{ margin: 0, fontSize: "0.75rem", color: "#38bdf8", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em" }}>DayOne AI</p>
-                <h1 style={{ margin: "0.25rem 0 0", fontSize: "1.5rem", fontWeight: 700, color: "#f8fafc", letterSpacing: "-0.03em" }}>HR Policy Assistant</h1>
+            <div className="header-row">
+              <div className="header-brand">
+                <span className="header-accent" aria-hidden="true" />
+                <div>
+                  <p style={{ margin: 0, fontSize: "0.72rem", color: "#38bdf8", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em" }}>DayOne AI</p>
+                  <h1 style={{ margin: "0.15rem 0 0", fontSize: "1.65rem", fontWeight: 800, color: "#f8fafc", letterSpacing: "-0.04em" }}>HR Policy Assistant</h1>
+                </div>
               </div>
-              <div style={{ padding: "0.5rem 1rem", borderRadius: "12px", background: "rgba(56, 189, 248, 0.05)", border: "1px solid rgba(56, 189, 248, 0.1)", textAlign: "right" }}>
-                <p style={{ margin: 0, fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#64748b" }}>Secure Tenant</p>
-                <p style={{ margin: 0, fontSize: "0.875rem", fontWeight: 600, color: "#38bdf8" }}>{organization}</p>
+              <div className="header-meta" style={{ textAlign: "right" }}>
+                <p style={{ margin: 0, fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "#64748b" }}>Signed in</p>
+                <p style={{ margin: 0, fontSize: "0.82rem", fontWeight: 600, color: "#cbd5e1" }}>{usernameDisplay} | {organization}</p>
               </div>
             </div>
           </header>
 
           <div className="chat-messages">
             {messages.length === 0 ? (
-              <div style={{ display: "grid", minHeight: "55vh", placeItems: "center" }}>
-                <div style={{ maxWidth: "640px", textAlign: "center" }}>
+              <div className="welcome-panel">
+                <div className="welcome-panel-inner">
                   <h2 className="welcome-title">Welcome to DayOne AI</h2>
                   <p style={{ fontSize: "0.9rem", color: "#64748b", lineHeight: 1.7, margin: "0 auto 2rem", maxWidth: "480px" }}>
                     Ask about onboarding, benefits, PTO, and company policy.
                   </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "0.75rem" }}>
+                  <div className="welcome-suggestions">
                     {SUGGESTIONS.map(item => (
                       <button key={item.text} onClick={() => void sendPrompt(item.text)} className="suggestion-card" aria-label={`Ask: ${item.text}`}>
                         <span style={{ fontSize: "1.5rem" }}>{item.icon}</span>
