@@ -267,7 +267,7 @@ if ($UseSeparateTerminals) {
     Start-Process powershell -ArgumentList '-NoExit', '-ExecutionPolicy', 'Bypass', '-Command', $apiCommand | Out-Null
 
     Write-Host 'Starting Next.js frontend in a new terminal...' -ForegroundColor Cyan
-    $frontendCommand = "Set-Location '$projectRoot'; `$env:NEXT_PUBLIC_API_BASE_URL='http://127.0.0.1:8000'; npm.cmd run dev"
+    $frontendCommand = "Set-Location '$projectRoot'; `$env:NEXT_PUBLIC_API_BASE_URL='http://127.0.0.1:8000'; npm.cmd run dev -- -p 3000"
     Start-Process powershell -ArgumentList '-NoExit', '-ExecutionPolicy', 'Bypass', '-Command', $frontendCommand | Out-Null
 }
 else {
@@ -289,7 +289,7 @@ else {
     Start-BackgroundProcess `
         -Name 'frontend' `
         -FilePath $npmCmd.Source `
-        -ArgumentList @('run', 'dev') `
+        -ArgumentList @('run', 'dev', '--', '-p', '3000') `
         -WorkingDirectory $projectRoot `
         -Env @{ NEXT_PUBLIC_API_BASE_URL = 'http://127.0.0.1:8000' }
 

@@ -93,7 +93,11 @@ async def lifespan(_app: FastAPI):
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     try:
         if auth_db.is_enabled():
-            storage_minio.ensure_bucket()
+            try:
+                await asyncio.wait_for(asyncio.to_thread(storage_minio.ensure_bucket), timeout=5)
+            except (asyncio.TimeoutError, Exception):
+                # Keep boot resilient; storage can recover on the first upload.
+                pass
     except Exception:
         # Keep boot resilient; failures surface on first upload operation.
         pass
