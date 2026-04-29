@@ -17,140 +17,71 @@ export default function Page() {
         router.replace(decoded.role === "admin" ? "/admin" : "/chat");
         return;
       }
-    }
-    setIsReady(true);
-  }, [router]);
+        <main className="landing-root">
+          <div className="landing-orb landing-orb-left" />
+          <div className="landing-orb landing-orb-right" />
 
-  if (!isReady) {
-    return <main className="min-h-screen bg-slate-950" />;
-  }
+          <section className="landing-shell">
+            <div className="landing-copy animate-fade-in">
+              <div className="monogram monogram-large">D1</div>
+              <p className="eyebrow">Multi-tenant HR assistant</p>
+              <h1 className="hero-title">
+                Ground answers in the documents your team actually trusts.
+              </h1>
+              <p className="hero-subtitle">
+                DayOne AI turns policy, benefits, and onboarding content into a polished internal assistant with confidence scores, source traceability, and tenant isolation.
+              </p>
 
-  return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 flex flex-col items-center justify-center relative overflow-hidden">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        
-        .landing-root {
-          font-family: 'Inter', sans-serif;
-        }
+              <div className="hero-actions">
+                <button className="cta-btn cta-primary" onClick={() => router.push("/signup")}>
+                  Create Organization
+                </button>
+                <button className="cta-btn cta-secondary" onClick={() => router.push("/login")}>
+                  Sign in
+                </button>
+              </div>
 
-        .glow-bg {
-          position: absolute;
-          inset: 0;
-          background: 
-            radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.1) 0%, transparent 50%);
-          pointer-events: none;
-        }
+              <div className="hero-metrics">
+                <div className="metric-card">
+                  <span className="metric-value">1</span>
+                  <span className="metric-label">source trail for every answer</span>
+                </div>
+                <div className="metric-card">
+                  <span className="metric-value">3</span>
+                  <span className="metric-label">core trust signals: confidence, sources, abstention</span>
+                </div>
+                <div className="metric-card">
+                  <span className="metric-value">0</span>
+                  <span className="metric-label">cross-tenant leakage by design</span>
+                </div>
+              </div>
+            </div>
 
-        .hero-title {
-          font-size: clamp(2.5rem, 8vw, 4.5rem);
-          font-weight: 800;
-          letter-spacing: -0.04em;
-          line-height: 1.1;
-          margin-bottom: 1.5rem;
-          background: linear-gradient(to bottom right, #fff, #94a3b8);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
+            <aside className="landing-panel glass-card animate-fade-in">
+              <div className="landing-panel-top">
+                <p className="eyebrow">What employees see</p>
+                <h2 className="panel-title">A clean, trustworthy chat surface</h2>
+              </div>
 
-        .hero-subtitle {
-          font-size: clamp(1rem, 3vw, 1.25rem);
-          color: #94a3b8;
-          max-width: 600px;
-          margin-bottom: 3rem;
-          line-height: 1.6;
-        }
+              <div className="panel-story">
+                <div className="panel-chip">PTO</div>
+                <div className="panel-chip">Benefits</div>
+                <div className="panel-chip">Onboarding</div>
+              </div>
 
-        .cta-btn {
-          padding: 1rem 2rem;
-          border-radius: 16px;
-          font-weight: 600;
-          font-size: 1rem;
-          transition: all 0.2s;
-          cursor: pointer;
-        }
-
-        .cta-primary {
-          background: #0ea5e9;
-          color: white;
-          border: none;
-          box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
-        }
-
-        .cta-primary:hover {
-          background: #38bdf8;
-          transform: translateY(-2px);
-          box-shadow: 0 15px 40px rgba(56, 189, 248, 0.4);
-        }
-
-        .cta-secondary {
-          background: rgba(255, 255, 255, 0.05);
-          color: white;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          margin-left: 1rem;
-        }
-
-        .cta-secondary:hover {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .monogram-large {
-          width: 80px;
-          height: 80px;
-          border-radius: 24px;
-          background: rgba(56, 189, 248, 0.1);
-          border: 1px solid rgba(56, 189, 248, 0.3);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 2rem;
-          font-size: 2rem;
-          font-weight: 800;
-          color: #38bdf8;
-          box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-fade-in {
-          animation: fadeIn 0.8s ease-out forwards;
-        }
-      `}</style>
-
-      <div className="glow-bg" />
-      
-      <div className="landing-root max-w-4xl mx-auto px-6 text-center z-10 animate-fade-in">
-        <div className="flex justify-center">
-          <div className="monogram-large">D1</div>
-        </div>
-        
-        <h1 className="hero-title">
-          Scale your HR <br /> with DayOne AI.
-        </h1>
-        
-        <p className="hero-subtitle">
-          The multi-tenant RAG platform for secure, grounded HR document intelligence. 
-          Zero-hallucination policy compliance at scale.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <button 
-            className="cta-btn cta-primary"
-            onClick={() => router.push("/signup")}
-          >
-            Create Organization
-          </button>
-          <button 
-            className="cta-btn cta-secondary"
-            onClick={() => router.push("/login")}
-          >
-            Sign in
-          </button>
+              <div className="panel-preview">
+                <div className="preview-user">How many PTO days do I get?</div>
+                <div className="preview-assistant">
+                  You can view the policy summary, source citations, and confidence level before acting on the answer.
+                </div>
+                <div className="preview-badges">
+                  <span className="feature-pill">Confidence: High</span>
+                  <span className="feature-pill">2 sources</span>
+                </div>
+              </div>
+            </aside>
+          </section>
+        </main>
         </div>
         
         <div className="mt-20 pt-10 border-t border-white/5 flex flex-wrap justify-center gap-x-12 gap-y-6 opacity-40">

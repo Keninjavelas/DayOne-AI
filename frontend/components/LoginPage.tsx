@@ -21,66 +21,85 @@ type JwtPayload = {
   exp?: number;
 };
 
-type LoginPageProps = {
-  apiBaseUrl?: string;
-};
+  return (
+    <div className="login-root">
+      <div className="auth-shell">
+        <section className="auth-hero glass-card">
+          <div className="monogram monogram-large">D1</div>
+          <p className="eyebrow">Secure HR intelligence</p>
+          <h1 className="auth-hero-title">Welcome back to DayOne AI</h1>
+          <p className="auth-hero-copy">
+            Sign in to review policies, answer employee questions, and keep every response grounded in your organization&apos;s documents.
+          </p>
 
-function decodeJwt(token: string): JwtPayload | null {
-  try {
-    const payload = token.split(".")[1];
-    if (!payload) return null;
-    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-    const json = atob(padded);
-    return JSON.parse(json) as JwtPayload;
-  } catch {
-    return null;
-  }
-}
+          <div className="feature-stack">
+            <div className="feature-pill">Grounded answers from approved files</div>
+            <div className="feature-pill">Multi-tenant organization isolation</div>
+            <div className="feature-pill">Confidence and source details built in</div>
+          </div>
+        </section>
 
-export default function LoginPage({ apiBaseUrl }: LoginPageProps) {
-  const router = useRouter();
-  const apiRoot = useMemo(
-    () => apiBaseUrl ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000",
-    [apiBaseUrl],
+        <section className="auth-panel glass-card">
+          <div className="auth-panel-header">
+            <p className="eyebrow">Sign in</p>
+            <h2 className="auth-panel-title">Access your workspace</h2>
+          </div>
+
+          {error && <div className="error-box">{error}</div>}
+
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="field-group">
+              <label className="login-label">Organization</label>
+              <input
+                className="login-input"
+                type="text"
+                placeholder="e.g. Acme Corp"
+                value={organization}
+                onChange={(e) => setOrganization(e.target.value)}
+                required
+              />
+            </div>
+            <div className="field-group">
+              <label className="login-label">Username</label>
+              <input
+                className="login-input"
+                type="text"
+                placeholder="Your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+            <div className="field-group">
+              <label className="login-label">Password</label>
+              <input
+                className="login-input"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button className="login-btn" type="submit" disabled={loading}>
+              {loading ? "Logging in..." : "Continue"}
+            </button>
+          </form>
+
+          <p className="auth-footer">
+            Don&apos;t have an organization? {" "}
+            <button
+              onClick={() => router.push("/signup")}
+              className="link-btn"
+              type="button"
+            >
+              Sign up
+            </button>
+          </p>
+        </section>
+      </div>
+    </div>
   );
-  const defaultOrganization = process.env.NEXT_PUBLIC_DEMO_ORGANIZATION ?? "org_acme";
-
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [organization, setOrganization] = useState(defaultOrganization);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await apiRequest<
-        Partial<AuthToken> & { detail?: string },
-        { username: string; password: string; organization: string }
-      >({
-        url: `${apiRoot}/auth/login`,
-        method: "POST",
-        data: { username, password, organization },
-      });
-
-      if (!data.access_token) {
-        throw new Error("Login succeeded but no access token was returned.");
-      }
-
-      localStorage.setItem("dayone_token", data.access_token);
-      const decoded = decodeJwt(data.access_token);
-      const role = decoded?.role || data.role || "employee";
-
-      localStorage.setItem(
-        "dayone_profile",
-        JSON.stringify({
-          username: decoded?.username || data.username || username,
-          organization: decoded?.organization || data.organization || organization,
-          role,
         }),
       );
 
