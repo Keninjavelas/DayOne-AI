@@ -16,8 +16,14 @@ credentials:
       role: employee
       failed_login_attempts: 0
       logged_in: false
+    testuser:
+      email: ''
+      name: ''
+      password: $2b$12$tvFRLQHIZCzr1MvZHWR8Veeyxy30XO7SO52XPoAPiIy204HEQTU0a
+      organization: org_acme
+      role: employee
 cookie:
-  expiry_days: 30
+  expiry_days: 0
   key: dayone_secret_signature_key_2026
   name: dayone_login
 preauthorized:

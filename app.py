@@ -104,136 +104,524 @@ def configure_page(authenticated: bool) -> None:
 
     st.markdown(
         f"""
-        <style>
-            /* ── Global font ── */
+        <style>            /* ── Global font ── */
             html, body, [class*="css"] {{
                 font-family: 'Inter', sans-serif !important;
-            }}
-
-            /* ── Animated gradient background ── */
-            @keyframes gradientDrift {{
-                0%   {{ background-position: 0% 50%; }}
-                50%  {{ background-position: 100% 50%; }}
-                100% {{ background-position: 0% 50%; }}
+                background-color: #050816 !important;
+                color: #f8fafc !important;
             }}
 
             .stApp {{
-                background: linear-gradient(-45deg, #020617, #0b1323, #0c1a30, #060f1e);
-                background-size: 400% 400%;
-                animation: gradientDrift 14s ease infinite;
-                color: #e2e8f0;
+                background: #050816;
+                color: #f8fafc;
             }}
 
-            /* Radial accent overlays */
-            .stApp::before {{
-                content: '';
-                position: fixed;
-                inset: 0;
-                background:
-                    radial-gradient(circle at 15% 25%, rgba(56, 189, 248, 0.1) 0%, transparent 40%),
-                    radial-gradient(circle at 85% 75%, rgba(14, 165, 233, 0.07) 0%, transparent 40%);
-                pointer-events: none;
-                z-index: 0;
-            }}
-
-            #MainMenu, footer, header {{ visibility: hidden; }}
+            #MainMenu, footer {{ visibility: hidden; }}
             {sidebar_css}
+
+            /* AI Concierge Hero Layout */
+            .hero-section {{
+                text-align: center;
+                padding: 2rem 0 3rem 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                  .mascot-container {{
+                position: relative;
+                width: 140px;
+                height: 140px;
+                margin: 0 auto 1.5rem auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }}
+            .mascot-halo {{
+                position: absolute;
+                top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                width: 140px; height: 140px;
+                border-radius: 50%;
+                box-shadow: 0 0 60px 20px rgba(124, 58, 237, 0.4), 0 0 100px 40px rgba(59, 130, 246, 0.2);
+                animation: pulseHalo 4s ease-in-out infinite;
+                z-index: 1;
+            }}
+            @keyframes pulseHalo {{
+                0% {{ opacity: 0.6; transform: translate(-50%, -50%) scale(0.95); }}
+                50% {{ opacity: 1; transform: translate(-50%, -50%) scale(1.05); }}
+                100% {{ opacity: 0.6; transform: translate(-50%, -50%) scale(0.95); }}
+            }}
+            .spark {{
+                position: absolute;
+                width: 4px; height: 4px;
+                background: #fff;
+                border-radius: 50%;
+                box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+                opacity: 0;
+                animation: floatSpark 3s ease-in infinite;
+                z-index: 2;
+            }}
+            .spark-1 {{ top: 10%; left: 20%; animation-delay: 0s; }}
+            .spark-2 {{ top: 80%; left: 80%; animation-delay: 1.5s; width: 3px; height: 3px; }}
+            .spark-3 {{ top: 70%; left: 10%; animation-delay: 2.2s; }}
+            .spark-4 {{ top: 20%; left: 85%; animation-delay: 0.7s; width: 5px; height: 5px; }}
+            @keyframes floatSpark {{
+                0% {{ transform: translateY(0) scale(0.5); opacity: 0; }}
+                20% {{ opacity: 1; }}
+                80% {{ opacity: 1; }}
+                100% {{ transform: translateY(-40px) scale(1.2); opacity: 0; }}
+            }}
+
+            .hero-mascot {{
+                width: 140px;
+                height: 140px;
+                border-radius: 50%;
+                box-shadow: 0 0 40px rgba(124, 58, 237, 0.5), inset 0 0 20px rgba(59, 130, 246, 0.5);
+                border: 2px solid rgba(255, 255, 255, 0.15);
+                animation: float 6s ease-in-out infinite, pulseGlow 4s ease-in-out infinite;
+                object-fit: cover;
+                position: relative;
+                z-index: 10;
+            }}
+            .hero-mascot-placeholder {{
+                font-size: 4rem;
+                animation: float 6s ease-in-out infinite;
+                position: relative;
+                z-index: 10;
+            }}
+            @keyframes float {{
+                0% {{ transform: translateY(0px); }}
+                50% {{ transform: translateY(-12px); }}
+                100% {{ transform: translateY(0px); }}
+            }}
+            @keyframes pulseGlow {{
+                0% {{ box-shadow: 0 0 30px rgba(124, 58, 237, 0.4), inset 0 0 10px rgba(59, 130, 246, 0.3); border-color: rgba(255,255,255,0.1); }}
+                50% {{ box-shadow: 0 0 80px rgba(124, 58, 237, 0.7), inset 0 0 40px rgba(59, 130, 246, 0.7); border-color: rgba(124, 58, 237, 0.6); }}
+                100% {{ box-shadow: 0 0 30px rgba(124, 58, 237, 0.4), inset 0 0 10px rgba(59, 130, 246, 0.3); border-color: rgba(255,255,255,0.1); }}
+            }}
+
+
+            
+            .section-kicker {{
+                font-size: 0.85rem;
+                font-weight: 700;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 1rem;
+            }}
+            /* Glassmorphism Cards */
+            .glass-card {{
+                background: rgba(255, 255, 255, 0.03) !important;
+                backdrop-filter: blur(24px) !important;
+                -webkit-backdrop-filter: blur(24px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                border-radius: 20px !important;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+                padding: 1.5rem !important;
+                transition: transform 0.3s ease, border-color 0.3s ease;
+            }}
+            .glass-card:hover {{
+                transform: translateY(-2px);
+                border-color: rgba(255, 255, 255, 0.15) !important;
+            }}
+            .stat-card {{
+                display: flex;
+                flex-direction: column;
+                min-height: 180px;
+            }}
+            .stat-title {{
+                color: #94a3b8;
+                font-size: 0.8rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 0.75rem;
+            }}
+            .stat-number {{
+                color: #f8fafc;
+                font-size: 4rem;
+                font-weight: 800;
+                line-height: 1;
+                letter-spacing: -0.04em;
+            }}
+            .stat-unit {{
+                color: #64748b;
+                font-size: 0.9rem;
+                font-weight: 500;
+                margin-top: 0.25rem;
+                margin-bottom: auto;
+            }}
+            .stat-value {{
+                color: #f8fafc;
+                font-size: 2.2rem;
+                font-weight: 800;
+                line-height: 1.1;
+                margin: 0.25rem 0;
+            }}
+            .stat-bar {{
+                margin-top: auto;
+                width: 100%;
+                height: 6px;
+                background: rgba(255, 255, 255, 0.06);
+                border-radius: 3px;
+                overflow: hidden;
+            }}
+            .stat-progress {{
+                height: 100%;
+                background: linear-gradient(90deg, #7C3AED, #3b82f6);
+                border-radius: 3px;
+                transition: width 0.8s ease;
+            }}
+            .task-item {{
+                display: flex;
+                align-items: flex-start;
+                gap: 0.5rem;
+                color: #94a3b8;
+                font-size: 0.85rem;
+                line-height: 1.3;
+                margin-top: 0.4rem;
+            }}
+            .task-dot {{
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #FFB020;
+                margin-top: 0.35rem;
+                flex-shrink: 0;
+                box-shadow: 0 0 6px rgba(255, 176, 32, 0.6);
+            }}
+            .text-success {{ color: #00D084 !important; }}
+            .text-warning {{ color: #FFB020 !important; }}
+
+            /* ── Glassmorphism Chat Bubbles ── */
+            .stChatMessage {{
+                background: rgba(13, 19, 38, 0.6) !important;
+                backdrop-filter: blur(12px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                border-radius: 16px !important;
+                padding: 1.5rem !important;
+                margin-bottom: 1.5rem !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+            }}
+            .stChatMessage:hover {{
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            }}
+            /* ── Re-styled Buttons as Feature Tiles (Secondary) ── */
+            .stButton > button[kind="secondary"] {{
+                border-radius: 16px !important;
+                background: rgba(255, 255, 255, 0.02) !important;
+                backdrop-filter: blur(20px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.02) !important;
+                color: #94a3b8 !important;
+                font-weight: 600 !important;
+                font-size: 1.05rem !important;
+                padding: 1.25rem 1rem !important;
+                transition: all 0.2s ease !important;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.01), 0 4px 10px rgba(0,0,0,0.1) !important;
+                width: 100% !important;
+                display: flex !important;
+                justify-content: flex-start !important;
+                text-align: left !important;
+            }}
+            .stButton > button[kind="secondary"]:hover {{
+                background: rgba(255, 255, 255, 0.05) !important;
+                border-color: rgba(255, 255, 255, 0.1) !important;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.2) !important;
+                color: #f8fafc !important;
+                transform: translateY(-2px) !important;
+            }}
+            .stButton > button[kind="secondary"] p {{
+                font-size: 1.05rem !important;
+            }}
+
+            /* ── Sidebar Navigation Link Styling ── */
+            .stSidebar .stButton > button {{
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 8px !important;
+                color: #94a3b8 !important;
+                padding: 0.6rem 1rem !important;
+                font-weight: 500 !important;
+                font-size: 0.95rem !important;
+                margin-bottom: 0.2rem !important;
+            }}
+            .stSidebar .stButton > button p {{
+                font-size: 0.95rem !important;
+                font-weight: 500 !important;
+            }}
+            .stSidebar .stButton > button:hover {{
+                background: rgba(255, 255, 255, 0.05) !important;
+                color: #f8fafc !important;
+                transform: none !important;
+                border-color: transparent !important;
+                box-shadow: none !important;
+            }}
+
+            /* ── Proactive Action Cards (Lower Weight) ── */
+            .proactive-card {{
+                background: rgba(255, 255, 255, 0.01);
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-bottom: none;
+                border-top-left-radius: 16px;
+                border-top-right-radius: 16px;
+                padding: 1.25rem;
+                margin-bottom: -1rem; /* Collapse with button */
+                box-shadow: inset 0 1px 1px rgba(255,255,255,0.02);
+            }}
+            .proactive-card-red {{ border-top: 2px solid rgba(244, 63, 94, 0.5); background: linear-gradient(180deg, rgba(244, 63, 94, 0.05) 0%, transparent 100%); }}
+            .proactive-card-purple {{ border-top: 2px solid rgba(168, 85, 247, 0.5); background: linear-gradient(180deg, rgba(168, 85, 247, 0.05) 0%, transparent 100%); }}
+            .proactive-card-green {{ border-top: 2px solid rgba(16, 185, 129, 0.5); background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, transparent 100%); }}
+            .proactive-card-blue {{ border-top: 2px solid rgba(59, 130, 246, 0.5); background: linear-gradient(180deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%); }}
+            .proactive-card h4 {{
+                margin: 0 0 0.5rem 0;
+                font-size: 1.05rem;
+                color: #e2e8f0;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }}
+            .proactive-card p {{
+                margin: 0;
+                font-size: 0.9rem;
+                color: #64748b;
+                line-height: 1.4;
+            }}
+            
+            /* Overriding secondary buttons inside columns to snap to proactive cards */
+            .stApp [data-testid="stVerticalBlock"] > [style*="flex-direction: column;"] > [data-testid="stVerticalBlock"] .stButton > button[kind="secondary"] {{
+                border-top-left-radius: 0 !important;
+                border-top-right-radius: 0 !important;
+                border-bottom-left-radius: 16px !important;
+                border-bottom-right-radius: 16px !important;
+                margin-top: -16px !important;
+                justify-content: center !important;
+                text-align: center !important;
+                padding: 0.8rem !important;
+                margin-bottom: 1rem !important;
+            }}
+
+            .unified-hero {{
+                background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+                backdrop-filter: blur(40px);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-top: 1px solid rgba(124, 58, 237, 0.5);
+                border-top-left-radius: 24px;
+                border-top-right-radius: 24px;
+                border-bottom: none;
+                box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 40px rgba(124, 58, 237, 0.1);
+                padding: 3rem 2rem 1.5rem 2rem;
+                max-width: 700px;
+                margin: 0 auto;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }}
+            .unified-hero::before {{
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0; height: 100%;
+                background: radial-gradient(circle at top center, rgba(124, 58, 237, 0.15), transparent 60%);
+                pointer-events: none;
+            }}
+            .unified-hero .hero-title {{
+                font-size: 3.5rem !important;
+                font-weight: 800 !important;
+                letter-spacing: -0.05em !important;
+                margin-bottom: 0.25rem !important;
+                line-height: 1.1 !important;
+                background: linear-gradient(135deg, #ffffff, #94a3b8);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                position: relative; z-index: 10;
+            }}
+            .unified-hero .hero-context {{
+                font-size: 1.15rem;
+                color: #94a3b8;
+                font-weight: 500;
+                margin-bottom: 2.5rem;
+                letter-spacing: 0.02em;
+                position: relative; z-index: 10;
+            }}
+            .unified-hero .insight-box {{
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 16px;
+                padding: 1.5rem;
+                text-align: left;
+                margin-bottom: 0.5rem;
+                position: relative; z-index: 10;
+            }}
+            .unified-hero .insight-header {{
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.85rem;
+                font-weight: 700;
+                color: #A78BFA;
+                margin-bottom: 0.75rem;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }}
+            .unified-hero .insight-body {{
+                font-size: 1.15rem;
+                color: #f8fafc;
+                line-height: 1.6;
+                font-weight: 500;
+                margin: 0;
+            }}
+            
+            /* Primary button snaps to unified hero card bottom */
+            .stButton > button[kind="primary"] {{
+                border-top-left-radius: 0 !important;
+                border-top-right-radius: 0 !important;
+                border-bottom-left-radius: 24px !important;
+                border-bottom-right-radius: 24px !important;
+                background: rgba(124, 58, 237, 0.2) !important;
+                border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.03) !important;
+                color: #fff !important;
+                text-align: center !important;
+                justify-content: center !important;
+                padding: 1.2rem !important;
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5) !important;
+                margin-top: -16px !important;
+                max-width: 700px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                display: block !important;
+                transition: background 0.2s !important;
+            }}
+            .stButton > button[kind="primary"]:hover {{
+                background: rgba(124, 58, 237, 0.4) !important;
+                border-color: rgba(124, 58, 237, 0.6) !important;
+            }}
+
+            /* ── SVG Circular Progress ── */
+            .circular-chart {{
+                display: block;
+                width: 60px !important;
+                height: 60px !important;
+                flex-shrink: 0;
+            }}
+            .circle-bg {{
+                fill: none;
+                stroke: rgba(255, 255, 255, 0.05);
+                stroke-width: 3.8;
+            }}
+            .circle {{
+                fill: none;
+                stroke-width: 3.8;
+                stroke-linecap: round;
+                animation: progress 1.5s ease-out forwards;
+            }}
+            @keyframes progress {{
+                0% {{ stroke-dasharray: 0 100; }}
+            }}
+            .percentage {{
+                fill: #f8fafc;
+                font-family: inherit;
+                font-size: 0.7rem;
+                font-weight: 800;
+                text-anchor: middle;
+            }}
+
+            /* ── Massive Chat Input ── */
+            .stChatInputContainer {{
+                padding-bottom: 2.5rem !important;
+            }}
+            .stChatInput {{
+                background: rgba(15, 23, 42, 0.9) !important;
+                backdrop-filter: blur(24px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                border-top: 1px solid rgba(124, 58, 237, 0.5) !important;
+                border-radius: 20px !important;
+                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1) !important;
+                padding: 0.5rem !important;
+            }}
+            .stChatInput textarea {{
+                color: #f8fafc !important;
+                font-size: 1.1rem !important;
+            }}
+            .stChatInput textarea::placeholder {{
+                color: #64748b !important;
+                font-weight: 500 !important;
+            }}        padding: 0.2rem !important;
+            }}
+            .stChatInput:focus-within {{
+                border-color: #7C3AED !important;
+                box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.4), 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+            }}
+            .stChatInput textarea {{
+                font-size: 1.1rem !important;
+            }}
 
             /* ── Login layout ── */
             .login-wrap {{
-                min-height: 72vh;
+                margin-top: 5vh;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }}
 
-            /* ── Login card with glowing border ── */
+            /* ── Login card ── */
             .login-card {{
                 width: min(520px, 92vw);
                 border-radius: 24px;
-                border: 1px solid transparent;
-                background: rgba(15, 23, 42, 0.85);
-                padding: 2rem 2rem 1.6rem;
-                box-shadow:
-                    0 0 0 1px rgba(56, 189, 248, 0.15),
-                    0 0 40px rgba(56, 189, 248, 0.08),
-                    0 25px 60px rgba(2, 6, 23, 0.6);
-                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(13, 19, 38, 0.6);
+                backdrop-filter: blur(24px);
+                padding: 3rem 2.5rem;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
                 text-align: center;
+            }}
+
+            /* Streamlit Form Styling (for login form) */
+            div[data-testid="stForm"] {{
+                border-radius: 20px !important;
+                background: rgba(255, 255, 255, 0.02) !important;
+                padding: 2.5rem !important;
+                box-shadow: none !important;
+                border: 1px solid rgba(255, 255, 255, 0.05) !important;
             }}
 
             /* ── D1 monogram ── */
             .login-monogram {{
-                width: 56px;
-                height: 56px;
+                width: 64px;
+                height: 64px;
                 border-radius: 16px;
-                background: rgba(56, 189, 248, 0.1);
-                border: 1px solid rgba(56, 189, 248, 0.3);
+                background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(59, 130, 246, 0.1));
+                border: 1px solid rgba(124, 58, 237, 0.4);
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin: 0 auto 1.25rem;
-                font-size: 1.25rem;
-                font-weight: 700;
-                color: #38bdf8;
-                letter-spacing: -0.04em;
-                box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+                margin: 0 auto 1.5rem;
+                font-size: 1.75rem;
+                font-weight: 800;
+                color: #7C3AED;
+                box-shadow: 0 0 30px rgba(124, 58, 237, 0.2);
             }}
 
             .login-title {{
-                margin: 0 0 0.3rem 0;
-                font-size: 2rem;
-                font-weight: 700;
+                margin: 0 0 0.5rem 0;
+                font-size: 2.2rem;
+                font-weight: 800;
                 letter-spacing: -0.04em;
                 color: #f8fafc;
             }}
 
             .login-subtitle {{
-                margin: 0;
-                color: #64748b;
-                font-size: 0.9rem;
+                margin: 0 0 2rem 0;
+                color: #94a3b8;
+                font-size: 1.1rem;
+                font-weight: 500;
             }}
 
             .helper {{
                 color: #64748b;
-                font-size: 0.875rem;
-            }}
-
-            /* ── Welcome / zero-state card ── */
-            .welcome-card {{
-                border: 1px solid rgba(56, 189, 248, 0.12);
-                border-radius: 20px;
-                background: rgba(15, 23, 42, 0.75);
-                padding: 1.25rem 1.5rem;
-                margin-bottom: 1rem;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            }}
-
-            /* ── Sidebar user card ── */
-            .sidebar-user-card {{
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-                padding: 0.75rem;
-                border-radius: 14px;
-                border: 1px solid rgba(51, 65, 85, 0.6);
-                background: rgba(15, 23, 42, 0.7);
-                margin-bottom: 0.75rem;
-            }}
-
-            .sidebar-avatar {{
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
-                background: rgba(56, 189, 248, 0.15);
-                border: 1px solid rgba(56, 189, 248, 0.35);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: 700;
-                font-size: 0.9rem;
-                color: #38bdf8;
-                flex-shrink: 0;
+                font-size: 0.95rem;
             }}
         </style>
         """,
@@ -494,32 +882,36 @@ def render_login_hero() -> None:
 
 
 def render_employee_sidebar(authenticator: stauth.Authenticate, org_id: str) -> None:
-    # User identity card
-    username_display = st.session_state.get("name") or st.session_state.get("username", "User")
-    initial = (username_display[0] if username_display else "U").upper()
-    st.sidebar.markdown(
-        f"""
-        <div class="sidebar-user-card">
-            <div class="sidebar-avatar">{initial}</div>
-            <div style="min-width:0;">
-                <p style="margin:0;font-size:0.875rem;font-weight:600;color:#f1f5f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{html.escape(username_display)}</p>
-                <p style="margin:0;font-size:0.72rem;color:#64748b;">Employee</p>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.sidebar.caption(f"Org: **{org_id}**")
+    st.sidebar.markdown(f"""
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+        <div style="background: linear-gradient(135deg, #7C3AED, #3b82f6); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; font-size: 1rem; box-shadow: 0 4px 10px rgba(124, 58, 237, 0.4);">D1</div>
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #f8fafc; letter-spacing: -0.02em;">DayOne AI</h2>
+    </div>
+    """, unsafe_allow_html=True)
 
-    if MASCOT_PATH.exists():
-        st.sidebar.image(str(MASCOT_PATH), use_container_width=True)
-    else:
-        st.sidebar.info("Mascot asset not found at assets/mascot.png")
-
-    if st.sidebar.button("🗑️ Clear Conversation", use_container_width=True):
-        clear_conversation_memory()
+    if st.sidebar.button("🏠 Home", use_container_width=True):
+        st.session_state.messages = []
         st.rerun()
+    if st.sidebar.button("📋 Tasks", use_container_width=True):
+        st.session_state.pending_prompt = "What are my pending tasks?"
+    if st.sidebar.button("🏥 Benefits", use_container_width=True):
+        st.session_state.pending_prompt = "Show me my benefits portal."
+    if st.sidebar.button("📖 Policies", use_container_width=True):
+        st.session_state.pending_prompt = "Open the policies library."
+    if st.sidebar.button("📄 Documents", use_container_width=True):
+        st.session_state.pending_prompt = "Where are my documents?"
+    
+    st.sidebar.markdown("<br><p style='color: #64748b; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;'>Recent Chats</p>", unsafe_allow_html=True)
+    if st.sidebar.button("💬 Q3 PTO Policy", use_container_width=True):
+        st.session_state.pending_prompt = "Tell me about the Q3 PTO policy again."
+    if st.sidebar.button("💬 Travel Expenses", use_container_width=True):
+        st.session_state.pending_prompt = "How do I file travel expenses?"
 
+    st.sidebar.markdown("<br><br><br><br>", unsafe_allow_html=True)
+    
+    if st.sidebar.button("⚙️ Settings", use_container_width=True):
+        st.session_state.pending_prompt = "How do I change my settings?"
+        
     authenticator.logout("Sign Out", "sidebar", callback=clear_session_on_logout)
 
 
@@ -703,24 +1095,161 @@ def render_admin_portal(config: dict, username: str, org_id: str) -> None:
 SUGGESTION_ICONS = ["🕐", "🏥", "📅"]
 
 
-def render_zero_state() -> None:
-    st.markdown(
-        """
-        <div class="welcome-card">
-            <h3 style="margin:0; color:#f8fafc; font-size:1.25rem; font-weight:700; letter-spacing:-0.02em;">Welcome to DayOne AI</h3>
-            <p class="helper" style="margin-top:0.4rem;">
-                Ask about onboarding, benefits, leave, and HR policies specific to your organization.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+import base64
 
-    cols = st.columns(3)
-    for col, prompt, icon in zip(cols, SUGGESTED_PROMPTS, SUGGESTION_ICONS):
-        with col:
-            if st.button(f"{icon} {prompt}", use_container_width=True):
-                st.session_state.pending_prompt = prompt
+def get_base64_image(image_path: Path) -> str:
+    if not image_path.exists():
+        return ""
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
+def render_zero_state() -> None:
+    username_display = st.session_state.get("name") or st.session_state.get("username", "User")
+    first_name = html.escape(username_display.split()[0])
+    
+
+    mascot_b64 = get_base64_image(MASCOT_PATH)
+    mascot_html = f'''
+    <div class="mascot-container">
+        <div class="mascot-halo"></div>
+        <div class="spark spark-1"></div>
+        <div class="spark spark-2"></div>
+        <div class="spark spark-3"></div>
+        <div class="spark spark-4"></div>
+        <img src="data:image/png;base64,{mascot_b64}" class="hero-mascot" alt="Mascot">
+    </div>
+    ''' if mascot_b64 else '<div class="hero-mascot-placeholder">🤖</div>'
+
+    hero_md = f'<div class="unified-hero">{mascot_html}<div class="hero-title">Good Morning, {first_name} \U0001f44b</div><div class="hero-context">14 PTO days \u2022 2 tasks due</div><div class="insight-box"><div class="insight-header">\U0001f916 DayOne Insight</div><div class="insight-body">You have <strong style="color: #A78BFA;">enough PTO</strong> for a long weekend. However, your compliance training is <strong style="color: #FFB020;">overdue</strong>.</div></div></div>'
+    st.markdown(hero_md, unsafe_allow_html=True)
+    if st.button("Take Action →", key="insight_btn", type="primary", use_container_width=False):
+        st.session_state.pending_prompt = "Help me finish my compliance training and request PTO."
+
+    st.markdown('<div class="section-kicker">Your Workspace</div>', unsafe_allow_html=True)
+    cols = st.columns([2, 1, 1])
+
+    with cols[0]:
+        st.markdown("""
+        <div class="glass-card stat-card">
+            <div class="stat-title">PTO Balance</div>
+            <div class="stat-number" style="color:#A78BFA;">14</div>
+            <div class="stat-unit">Days Remaining</div>
+            <div class="stat-bar" style="margin-top: 1rem;">
+                <div class="stat-progress" style="width: 70%;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:0.4rem;">
+                <span style="font-size:0.75rem; color:#64748b;">14 of 20 used</span>
+                <span style="font-size:0.75rem; color:#7C3AED; font-weight:600;">70%</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    with cols[1]:
+        st.markdown("""
+        <div class="glass-card stat-card">
+            <div class="stat-title">Pending Tasks</div>
+            <div class="stat-number" style="color:#FFB020;">2</div>
+            <div class="stat-unit">Due This Week</div>
+            <div style="margin-top: 0.75rem;">
+                <div class="task-item">
+                    <div class="task-dot"></div>
+                    <span>Compliance Training</span>
+                </div>
+                <div class="task-item">
+                    <div class="task-dot"></div>
+                    <span>Profile Verification</span>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    with cols[2]:
+        st.markdown("""
+        <div class="glass-card stat-card" style="align-items:center; text-align:center;">
+            <div class="stat-title" style="align-self:flex-start;">Coverage Score</div>
+            <svg viewBox="0 0 36 36" style="stroke:#00D084; width:80px; height:80px; margin: 0.5rem auto;">
+                <path style="fill:none; stroke:rgba(255,255,255,0.06); stroke-width:3.8;" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path style="fill:none; stroke-width:3.8; stroke-linecap:round; stroke-dasharray:92,100;" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <text x="18" y="21" style="fill:#f8fafc; font-size:8px; font-weight:800; text-anchor:middle; font-family:inherit;">92%</text>
+            </svg>
+            <div style="display:flex; flex-direction:column; gap:0.3rem; margin-top:auto; align-self:flex-start; width:100%;">
+                <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; color:#94a3b8;">
+                    <span style="color:#00D084; font-weight:700;">&#10003;</span> Medical
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; color:#94a3b8;">
+                    <span style="color:#00D084; font-weight:700;">&#10003;</span> Dental
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; color:#94a3b8;">
+                    <span style="color:#00D084; font-weight:700;">&#10003;</span> Vision
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    
+    st.markdown('<div class="section-kicker">AI Suggestions</div>', unsafe_allow_html=True)
+    scols = st.columns(2)
+    with scols[0]:
+        st.markdown("""
+        <div class="proactive-card proactive-card-purple">
+            <h4>✈️ PTO Opportunity</h4>
+            <p>You have enough balance for a long weekend. Consider taking Friday off to recharge.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Request Leave", key="sug_pto", type="secondary", use_container_width=True):
+            st.session_state.pending_prompt = "I want to request leave for a long weekend."
+            
+        st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+            
+        st.markdown("""
+        <div class="proactive-card proactive-card-green">
+            <h4>🏥 New Benefits Available</h4>
+            <p>The updated medical plan has been verified. Would you like a summary?</p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Review Benefits", key="sug_ben", type="secondary", use_container_width=True):
+            st.session_state.pending_prompt = "What are the new health benefits available?"
+
+    with scols[1]:
+        st.markdown("""
+        <div class="proactive-card proactive-card-blue">
+            <h4>📄 Payslip Available</h4>
+            <p>Your May salary statement is ready and available for secure download.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Download", key="sug_pay", type="secondary", use_container_width=True):
+            st.session_state.pending_prompt = "Where can I download my latest payslip?"
+            
+        st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+            
+        st.markdown("""
+        <div class="proactive-card proactive-card-red">
+            <h4>🚀 Action Required</h4>
+            <p>Your compliance training is overdue. You have 2 pending modules remaining.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Start Training", key="sug_task", type="secondary", use_container_width=True):
+            st.session_state.pending_prompt = "What is remaining on my onboarding checklist?"
+
+    
+    st.markdown('<div class="section-kicker">Recent Activity</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="border-left: 2px solid rgba(255,255,255,0.05); margin-left: 1rem; padding-left: 1.5rem; position: relative; margin-top: 1.5rem;">
+        <div style="margin-bottom: 1.5rem; position: relative;">
+            <div style="position: absolute; left: -1.9rem; top: 0.2rem; width: 14px; height: 14px; background: #00D084; border-radius: 50%; box-shadow: 0 0 10px #00D084;"></div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Today</div>
+            <div style="color: #e2e8f0; font-size: 1.05rem;">PTO approved for upcoming holiday</div>
+        </div>
+        <div style="margin-bottom: 1.5rem; position: relative;">
+            <div style="position: absolute; left: -1.85rem; top: 0.2rem; width: 12px; height: 12px; background: rgba(255,255,255,0.2); border-radius: 50%;"></div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Yesterday</div>
+            <div style="color: #94a3b8; font-size: 1.05rem;">Payslip downloaded successfully</div>
+        </div>
+        <div style="position: relative;">
+            <div style="position: absolute; left: -1.85rem; top: 0.2rem; width: 12px; height: 12px; background: rgba(255,255,255,0.2); border-radius: 50%;"></div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Monday</div>
+            <div style="color: #94a3b8; font-size: 1.05rem;">Benefits profile updated</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def _render_justification(justification: List[dict], used_reranker: bool) -> None:
@@ -798,7 +1327,8 @@ def render_chat_history() -> None:
 def render_employee_chat(authenticator: stauth.Authenticate, org_id: str) -> None:
     render_employee_sidebar(authenticator, org_id)
 
-    st.markdown("## HR Policy Assistant")
+    # Removed dashboard top bar since it is now natively in the zero state.
+
     if st.session_state.kb_missing:
         st.warning("Your organisation's knowledge base is currently empty. Please contact HR.")
 
@@ -807,7 +1337,7 @@ def render_employee_chat(authenticator: stauth.Authenticate, org_id: str) -> Non
     else:
         render_zero_state()
 
-    typed_prompt = st.chat_input("Ask an HR policy question...")
+    typed_prompt = st.chat_input("Ask DayOne anything... PTO, benefits, expenses")
     active_prompt = st.session_state.get("pending_prompt") or typed_prompt
     st.session_state.pending_prompt = None
 
@@ -843,6 +1373,15 @@ def render_employee_chat(authenticator: stauth.Authenticate, org_id: str) -> Non
         label = confidence_label(confidence)
         colour = {"high": "🟢", "medium": "🟡", "low": "🔴"}.get(label, "⚪")
         st.caption(f"{colour} Confidence: {label} ({confidence:.0%})  |  Reranker: {'ON' if USE_RERANKER else 'OFF'}  |  Chunks: {len(justification)}")
+        
+        # Trust Signal
+        st.markdown(
+            "<div style='margin-top: 0.5rem; padding: 0.5rem 0.75rem; background-color: rgba(15, 23, 42, 0.6); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem; color: #94a3b8;'>"
+            "<strong>Sourced from official HR documents.</strong> <br>Last updated: May 2026."
+            "</div>",
+            unsafe_allow_html=True
+        )
+
         if conflict:
             st.warning("⚠️ Retrieved context spans multiple documents — verify with HR.", icon="⚠️")
         if confidence < CONF_LOW and confidence > 0:
@@ -875,12 +1414,10 @@ def main() -> None:
     )
 
     if st.session_state.get("authentication_status") is not True:
+        render_login_hero()
         col1, col2, col3 = st.columns([1, 1.2, 1])
         with col2:
-            with st.container(border=True):
-                st.markdown("### DayOne AI")
-                st.caption("Secure multi-tenant HR onboarding assistant")
-                authenticator.login(fields={"Form name": "Sign in"})
+            authenticator.login(fields={"Form name": "Sign in"})
 
     if st.session_state.get("authentication_status") is True:
         username = str(st.session_state.get("username", "")).strip()
@@ -907,7 +1444,7 @@ def main() -> None:
 
         st.session_state.kb_missing = False
 
-        st.caption(f"Signed in as {name or username} | Org: {org_id} | Role: {user_role}")
+        st.session_state.kb_missing = False
 
         if user_role == ROLE_ADMIN:
             authenticator.logout("Sign Out", "main", callback=clear_session_on_logout)

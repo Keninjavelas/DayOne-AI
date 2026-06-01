@@ -283,8 +283,10 @@ class HybridRetriever:
             ce = _get_cross_encoder()
             pairs = [(query, doc.page_content) for doc in candidates]
             raw_scores: List[float] = ce.predict(pairs).tolist()
+            # Convert logits to probability
+            probs = [_sigmoid(s) for s in raw_scores]
             # Apply source-reputation weights before final ranking
-            weighted_scores = self._apply_source_weights(candidates, raw_scores)
+            weighted_scores = self._apply_source_weights(candidates, probs)
             ranked = sorted(
                 zip(candidates, weighted_scores, raw_scores),
                 key=lambda x: x[1],
@@ -304,15 +306,15 @@ class HybridRetriever:
                     )
                 )
         else:
-            weighted_bm25 = self._apply_source_weights(candidates, cand_bm25)
+            weighted_fused = self._apply_source_weights(candidates, fused_scores)
             ranked_pairs = sorted(
-                zip(candidates, weighted_bm25, cand_bm25),
+                zip(candidates, weighted_fused, cand_bm25),
                 key=lambda x: x[1],
                 reverse=True,
             )
             final_docs = [d for d, _, _ in ranked_pairs[:final_k]]
             final_scores = [ws for _, ws, _ in ranked_pairs[:final_k]]
-            top_bm25 = cand_bm25[0] if cand_bm25 else 0.0
+            top_bm25 = ranked_pairs[0][2] if ranked_pairs else 0.0
             confidence = min(0.30 + (top_bm25 / 15.0) * 0.60, 0.95)
             raw_scores = cand_bm25  # for candidate_scores below
             reranked_topk = []
