@@ -126,7 +126,8 @@ def configure_page(authenticated: bool) -> None:
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                  .mascot-container {{
+            }}
+            .mascot-container {{
                 position: relative;
                 width: 140px;
                 height: 140px;
@@ -928,9 +929,101 @@ def _users_for_org(config: dict, org_id: str) -> List[dict]:
     return sorted(scoped, key=lambda item: item["username"].lower())
 
 
+def render_admin_portal(config: dict, username: str, org_id: str) -> None:
+    # ── Page header ──────────────────────────────────────────────────────────
+    st.markdown("""
+    <div style="
+        background: linear-gradient(145deg, rgba(30,41,59,0.6), rgba(15,23,42,0.8));
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-top: 1px solid rgba(124,58,237,0.4);
+        border-radius: 20px;
+        padding: 2rem 2rem 1.5rem 2rem;
+        margin-bottom: 2rem;
+    ">
+        <div style="font-size:0.8rem; font-weight:700; color:#A78BFA; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Administration</div>
+        <div style="font-size:2rem; font-weight:800; color:#f8fafc; letter-spacing:-0.03em; margin-bottom:0.5rem;">Knowledge Base</div>
+        <div style="font-size:0.95rem; color:#64748b;">Upload policy documents to rebuild your organization's AI knowledge index.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Upload section ────────────────────────────────────────────────────────
+    st.markdown("""
+    <div style="font-size:0.8rem; font-weight:700; color:#64748b; text-transform:uppercase;
+        letter-spacing:0.1em; margin-bottom:0.75rem;">Upload Documents</div>
+    """, unsafe_allow_html=True)
+
+    upload_col, info_col = st.columns([2, 1])
+    with upload_col:
+        upload_org = st.selectbox("Organization", options=[org_id], disabled=True)
+        uploaded_files = st.file_uploader(
+            "Drag & drop policy files here",
+            type=["pdf", "csv"],
+            accept_multiple_files=True,
+            label_visibility="visible",
+        )
+        if st.button("🔄  Rebuild Knowledge Index", type="primary", use_container_width=True):
+            if not uploaded_files:
+                st.warning("Please choose at least one file before rebuilding.")
+            else:
+                target_dir = DATA_DIR / upload_org
+                target_dir.mkdir(parents=True, exist_ok=True)
+                saved: List[str] = []
+                for upload in uploaded_files:
+                    filename = Path(upload.name).name
+                    if Path(filename).suffix.lower() not in {".pdf", ".csv"}:
+                        continue
+                    destination = target_dir / filename
+                    destination.write_bytes(upload.getbuffer())
+                    saved.append(filename)
+                if not saved:
+                    st.error("No supported files were uploaded.")
+                else:
+                    with st.status("Rebuilding knowledge index…", expanded=True) as rebuild_status:
+                        st.write("📄 Parsing and chunking documents…")
+                        rebuild_organization_index(target_dir, load_embeddings())
+                        rebuild_status.update(
+                            label=f"✅ Index rebuilt for **{upload_org}** ({len(saved)} file(s))",
+                            state="complete",
+                            expanded=False,
+                        )
+                    st.session_state.chain = None
+                    st.success(f"Successfully indexed {len(saved)} file(s) for **{upload_org}**.")
+                    st.caption("Files: " + ", ".join(saved) + f" · Updated by: {username}")
+
+    with info_col:
+        st.markdown("""
+        <div style="
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 1.5rem;
+            height: 100%;
+        ">
+            <div style="font-size:0.8rem; font-weight:700; color:#A78BFA; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1rem;">Supported Formats</div>
+            <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem; color:#94a3b8; font-size:0.9rem;">
+                <span style="font-size:1.2rem;">📄</span> PDF documents
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem; color:#94a3b8; font-size:0.9rem;">
+                <span style="font-size:1.2rem;">📊</span> CSV spreadsheets
+            </div>
+            <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.05);">
+                <div style="font-size:0.75rem; color:#475569; line-height:1.5;">
+                    Files are chunked, embedded, and added to the vector index for this organization only.
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='margin: 2.5rem 0 0 0;'></div>", unsafe_allow_html=True)
+    render_admin_user_management(config, username, org_id)
+
+
 def render_admin_user_management(config: dict, current_username: str, org_id: str) -> None:
-    st.markdown("### User Management")
-    st.caption("Create, update, and remove users for this organization without editing config files.")
+    st.markdown("""
+    <div style="font-size:0.8rem; font-weight:700; color:#64748b; text-transform:uppercase;
+        letter-spacing:0.1em; margin-bottom:0.75rem;">User Management</div>
+    """, unsafe_allow_html=True)
 
     users = _users_for_org(config, org_id)
     if users:
@@ -950,17 +1043,21 @@ def render_admin_user_management(config: dict, current_username: str, org_id: st
     else:
         st.info("No users are configured for this organization yet.")
 
+    st.markdown("<div style='margin-top:1.5rem;'></div>", unsafe_allow_html=True)
     create_col, update_col = st.columns(2)
 
     with create_col:
+        st.markdown("""
+        <div style="font-size:0.8rem; font-weight:700; color:#64748b; text-transform:uppercase;
+            letter-spacing:0.08em; margin-bottom:0.75rem;">Add New User</div>
+        """, unsafe_allow_html=True)
         with st.form("create-user-form", clear_on_submit=True):
-            st.markdown("#### Add User")
-            new_username = st.text_input("Username", help="3-64 chars using letters, numbers, ., _, or -")
-            new_name = st.text_input("Full name")
-            new_email = st.text_input("Email")
+            new_username = st.text_input("Username", placeholder="e.g. john.doe", help="3–64 chars: letters, numbers, . _ -")
+            new_name = st.text_input("Full Name", placeholder="John Doe")
+            new_email = st.text_input("Email", placeholder="john@company.com")
             new_role = st.selectbox("Role", options=[ROLE_EMPLOYEE, ROLE_ADMIN], index=0)
-            new_password = st.text_input("Temporary password", type="password", help="Minimum 8 characters")
-            create_submitted = st.form_submit_button("Create User", use_container_width=True)
+            new_password = st.text_input("Temporary Password", type="password", help="Minimum 8 characters")
+            create_submitted = st.form_submit_button("➕  Create User", use_container_width=True, type="primary")
 
         if create_submitted:
             updated_config = clone_config(config)
@@ -982,9 +1079,13 @@ def render_admin_user_management(config: dict, current_username: str, org_id: st
                 st.rerun()
 
     with update_col:
+        st.markdown("""
+        <div style="font-size:0.8rem; font-weight:700; color:#64748b; text-transform:uppercase;
+            letter-spacing:0.08em; margin-bottom:0.75rem;">Edit / Remove User</div>
+        """, unsafe_allow_html=True)
         user_options = [user["username"] for user in users]
         selected_username = st.selectbox(
-            "Select user",
+            "Select user to edit",
             options=user_options,
             index=0 if user_options else None,
             placeholder="Choose a user",
@@ -993,17 +1094,16 @@ def render_admin_user_management(config: dict, current_username: str, org_id: st
         selected_user = next((user for user in users if user["username"] == selected_username), None)
         if selected_user:
             with st.form("update-user-form"):
-                st.markdown("#### Edit User")
-                edit_name = st.text_input("Full name", value=selected_user["name"])
+                edit_name = st.text_input("Full Name", value=selected_user["name"])
                 edit_email = st.text_input("Email", value=selected_user["email"])
                 role_index = 0 if selected_user["role"] == ROLE_EMPLOYEE else 1
                 edit_role = st.selectbox("Role", options=[ROLE_EMPLOYEE, ROLE_ADMIN], index=role_index)
                 edit_password = st.text_input(
-                    "New password",
+                    "New Password",
                     type="password",
                     help="Leave blank to keep the existing password",
                 )
-                save_user = st.form_submit_button("Save Changes", use_container_width=True)
+                save_user = st.form_submit_button("💾  Save Changes", use_container_width=True, type="primary")
 
             if save_user:
                 updated_config = clone_config(config)
@@ -1024,9 +1124,10 @@ def render_admin_user_management(config: dict, current_username: str, org_id: st
                     st.success(f"Updated user `{selected_username}`.")
                     st.rerun()
 
+            st.markdown("<div style='margin-top:0.5rem;'></div>", unsafe_allow_html=True)
             delete_disabled = selected_username == current_username
-            delete_help = "You cannot delete the account you are currently using." if delete_disabled else None
-            if st.button("Delete User", use_container_width=True, disabled=delete_disabled, help=delete_help):
+            delete_help = "You cannot delete your own account." if delete_disabled else None
+            if st.button("🗑️  Delete User", use_container_width=True, disabled=delete_disabled, help=delete_help):
                 updated_config = clone_config(config)
                 try:
                     delete_user_record(
@@ -1040,56 +1141,6 @@ def render_admin_user_management(config: dict, current_username: str, org_id: st
                     persist_config(updated_config)
                     st.success(f"Deleted user `{selected_username}`.")
                     st.rerun()
-
-
-def render_admin_portal(config: dict, username: str, org_id: str) -> None:
-    st.markdown("## Administration Portal")
-    st.caption("Upload policy documents for your tenant and rebuild the index.")
-
-    upload_org = st.selectbox("Organization", options=[org_id], disabled=True)
-    uploaded_files = st.file_uploader(
-        "Upload policy files (.pdf, .csv)",
-        type=["pdf", "csv"],
-        accept_multiple_files=True,
-    )
-
-    if st.button("Save Files and Rebuild Index", width="stretch"):
-        if not uploaded_files:
-            st.warning("Please choose at least one file.")
-            return
-
-        target_dir = DATA_DIR / upload_org
-        target_dir.mkdir(parents=True, exist_ok=True)
-
-        saved: List[str] = []
-        for upload in uploaded_files:
-            filename = Path(upload.name).name
-            if Path(filename).suffix.lower() not in {".pdf", ".csv"}:
-                continue
-            destination = target_dir / filename
-            destination.write_bytes(upload.getbuffer())
-            saved.append(filename)
-
-        if not saved:
-            st.error("No supported files were uploaded.")
-            return
-
-        with st.status("Rebuilding tenant knowledge index…", expanded=True) as rebuild_status:
-            st.write("📄 Parsing and chunking documents…")
-            rebuild_organization_index(target_dir, load_embeddings())
-            rebuild_status.update(
-                label=f"✅ Index rebuilt for **{upload_org}** ({len(saved)} file(s))",
-                state="complete",
-                expanded=False,
-            )
-
-        st.session_state.chain = None
-        st.success(f"Rebuilt {upload_org} index with {len(saved)} file(s).")
-        st.caption("Saved: " + ", ".join(saved))
-        st.caption(f"Updated by: {username}")
-
-    st.divider()
-    render_admin_user_management(config, username, org_id)
 
 
 SUGGESTION_ICONS = ["🕐", "🏥", "📅"]
